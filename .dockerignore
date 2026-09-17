@@ -1,0 +1,11 @@
+.git
+.venv
+node_modules
+data
+copias
+**/__pycache__
+.pytest_cache
+.env
+.env.*
+*.sqlite3*
+*.zip

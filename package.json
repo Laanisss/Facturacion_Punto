@@ -1,0 +1,6 @@
+{
+  "name": "punto-server-ui-tests",
+  "private": true,
+  "scripts": {"test:ui": "node tests/ui.mjs"},
+  "devDependencies": {"happy-dom": "20.14.5"}
+}
