@@ -1,38 +1,49 @@
-# Punto 0.3.1 — base con servidor
+# Punto 0.5.1 beta — Promociones
 
-Esta entrega continúa la versión 0.3. Incluye el punto de venta conectado a un servidor, cuentas por negocio y panel de administrador. Es una base de desarrollo/piloto, no una versión 1.0 lista para clientes de pago. No está alojada en internet ni conectada a BAC HIT.
+Actualización del piloto con servidor para negocios de comida y productos. Conserva caja, catálogo con fotos, logo, tres plantillas, recibos centrados, usuarios separados por negocio y administración global. Esta beta sigue usando SQLite con una sola réplica. No es todavía la versión comercial 1.0.
 
-## Qué funciona
+**Para actualizar tu Railway existente, empieza por ACTUALIZAR.md.** No hay credenciales de administrador predeterminadas.
 
-- Registro de propietario y negocio, inicio y cierre de sesión. Un propietario y un negocio por cuenta en esta etapa.
-- Contraseñas con scrypt y sal individual; no se guardan ni se muestran contraseñas originales.
-- Sesión mediante cookie HttpOnly, SameSite=Strict, vencimiento de ocho horas y protección CSRF. La cookie usa Secure cuando PUNTO_ORIGIN es HTTPS.
-- Catálogo, imágenes, logo, plantillas y recibos centrados de la versión anterior.
-- Productos y ventas guardados en SQLite en el servidor. Los datos se conservan al reiniciarlo.
-- Cálculo del importe y descuento de inventario en el servidor dentro de una transacción.
-- Prevención de cobros duplicados al reintentar la misma solicitud; detección de cambios concurrentes.
-- Efectivo y tarjetas simuladas. Las simulaciones se identifican en los recibos y reportes.
-- Administrador global: lista de negocios, usuario propietario, estado, plan, vencimiento y número de ventas.
-- Alta con prueba gratuita de 14 días (decisión provisional configurable en server.py). No genera cobros.
-- Activar/suspender/extender acceso, con motivo y registro de cambios. Al vencer o suspender, se bloquean escrituras; se permite consultar/exportar datos.
-- Basic y Pro son etiquetas administrativas: todavía no tienen diferencias de funciones ni precios.
+## Promociones
 
-## Hosting elegido: Railway
+Nuevo menú para crear descuentos de porcentaje, monto fijo, 2×1, 3×2 y “lleva X, paga Y”, con vigencia, compra mínima y productos específicos. Se seleccionan al cobrar, se verifican en el servidor y quedan reflejados en el recibo. Incluido en ambos planes. Consulta **PROMOCIONES.md**.
 
-Incluye Dockerfile, railway.json, arranque con PORT y comprobación de salud. Consulta **RAILWAY.md** para configurar el volumen, dominio HTTPS y administrador. No se ha desplegado todavía. El piloto mantiene SQLite persistente; PostgreSQL está pendiente para la 0.4.
+## Novedades de operación y diseño
 
-## Ejecutar en Windows
+Consulta **NOVEDADES-0.5.md** para los detalles. Incluye inicio renovado, clientes, descuentos, apertura/cierre de caja, entradas/salidas, anulaciones completas, inventario con historial y exportación ampliada. **PRUEBA-NEGOCIO.md** guía una revisión de punta a punta. Las funciones operativas nuevas están en ambos planes.
 
-Requiere Python 3.12 o posterior compatible, instalado con el lanzador `py`. La primera instalación necesita internet para descargar dependencias.
+## Planes implementados
 
-1. Extraer toda la carpeta del ZIP.
-2. Ejecutar `Iniciar-Punto.bat`. Instala las dependencias en `.venv` y abre el servidor local.
-3. Abrir **http://127.0.0.1:8000** con Edge o Chrome. Usar exactamente esta dirección.
-4. Pulsar **Registrar negocio** para crear una cuenta de prueba. Las cuentas nuevas empiezan sin productos.
-5. Para tu cuenta de administrador, abrir otra ventana y ejecutar `Crear-Administrador.bat`. Pedirá usuario y contraseña de al menos 12 caracteres; no hay una clave predeterminada.
-6. Cerrar la sesión del negocio y entrar con la cuenta de administrador para ver el panel de control.
+| Ventaja | Básico | Pro / prueba de 14 días |
+|---|---|---|
+| Productos | Hasta 100 | Hasta 1.000 |
+| Fotos, logo, personalización y recibos | Sí | Sí |
+| Caja en efectivo y control de existencias | Sí | Sí |
+| Tarjetas de prueba, sin cobros reales | Sí | Sí |
+| Historial y exportación completa JSON | Sí | Sí |
+| Reportes por fechas de Honduras | — | Sí |
+| Promedio de venta y 10 productos más vendidos en efectivo | — | Sí |
+| Filtros de existencias bajas en catálogo | Sí | Sí |
+| Exportación CSV de ventas por período | — | Sí |
+| Cuenta propietaria por negocio | 1 | 1 |
 
-Si los archivos BAT no funcionan, ejecutar desde la carpeta del proyecto:
+Los precios se definen desde Administración → Planes y cobros. Moneda de suscripción: HNL, independiente de la moneda que use el comercio. Períodos de **30 días**, no meses calendario. Al instalar no se inventa un precio ni se cobra nada.
+
+## Suscripciones
+
+El negocio ve su plan, vencimiento, consumo del catálogo, ventajas y solicitudes. Puede pedir activación/renovación y cancelar una solicitud pendiente. El administrador configura precios, revisa solicitudes, aprueba pagos comprobados manualmente o rechaza con una nota. Las decisiones quedan auditadas y no se pueden repetir para duplicar días. También conserva el control manual de suspensión y vencimiento.
+
+Cambiar de plan inicia un ciclo nuevo sin prorrateo. Renovar el mismo plan activo suma 30 días al vencimiento. Más reglas en ACTUALIZAR.md. Los límites y permisos se verifican en el servidor, no solo en la interfaz.
+
+## Reportes
+
+Filtros por fecha inclusivos en hora de Honduras (UTC−6). Efectivo y tarjetas simuladas se separan; promedio y productos más vendidos incluyen únicamente efectivo y excluyen anuladas. Más vendidos muestra importes antes del descuento global; el total y promedio usan el importe neto. Las alertas muestran inventario actual, independientemente de las fechas seleccionadas. CSV incluye referencia, fecha, método, moneda, total, unidades, estado y descuento; no incluye nombres libres que puedan convertirse en fórmulas de hoja de cálculo.
+
+## Instalación local en Windows
+
+Requiere Python 3.12 compatible y el lanzador `py`. Extrae el ZIP completo, ejecuta `Iniciar-Punto.bat` y abre http://127.0.0.1:8000. Mantén abierta la terminal. `Crear-Administrador.bat` crea un administrador LOCAL. No funciona por doble clic en el HTML; necesitas el servidor. Los BAT no fueron ejecutados en Windows en esta entrega.
+
+Instalación manual:
 
 ```powershell
 py -3 -m venv .venv
@@ -41,64 +52,24 @@ py -3 -m venv .venv
 .venv\Scripts\python.exe -m uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
-Mantener abierta la terminal mientras se usa el programa. Ctrl+C detiene el servidor. Los BAT se incluyen como ayuda; el servidor se probó en Linux con Python 3.12, no se ejecutaron los BAT en Windows.
+Para Railway consulta RAILWAY.md y ACTUALIZAR.md. No cambies el volumen al actualizar. PUNTO_DB determina la base; PUNTO_ORIGIN determina el dominio permitido. `start.py` respeta PORT. Solo un proceso y una réplica. Dockerfile y configuración de Railway incluidos.
 
-## Cambio respecto al HTML anterior
+## Datos y seguridad
 
-`static/index.html` se abre a través del servidor; no funciona por doble clic. La versión local 0.3 sigue siendo un archivo separado y no fue reemplazada.
+SQLite con migración automática de esquema v1/v2/v3 a v4 y copia previa consistente. No migra perfiles del antiguo HTML sin servidor. Contraseñas con scrypt y sal, cookies HttpOnly/SameSite, Secure bajo HTTPS, CSRF, permisos por negocio, auditoría, control de revisiones y operaciones de venta transaccionales. No almacena números completos de tarjeta, CVV o PIN.
 
-No se importan automáticamente perfiles, contraseñas ni ventas del HTML anterior. Exporta y conserva tus datos antiguos. La migración validada con conciliación de totales forma parte de la 0.4. No copies manualmente contraseñas entre las bases.
+Puedes crear una copia completa con `python manage.py backup RUTA_NUEVA.sqlite3`. Contiene datos privados: consérvala fuera del repositorio. Las copias automáticas del proveedor y su retención deben configurarse aparte. Una copia en el mismo volumen no protege contra perder ese volumen.
 
-El servidor es la fuente de datos. Esta entrega requiere conexión con él para trabajar; no implementa ventas sin conexión ni sincronización en segundo plano. Dos equipos pueden usar el mismo backend cuando esté desplegado y configurado, pero la interfaz no se actualiza en tiempo real: ante un conflicto pide recargar para evitar sobrescrituras.
+## Verificación
 
-## Administración y futuro cobro de suscripciones
+En esta entrega pasaron 41 pruebas de backend/configuración y cuatro recorridos funcionales de interfaz contra el servidor HTTP. No se completó revisión visual en navegador: falló la descarga de Chromium. Windows e impresión física siguen pendientes.
 
-En el panel puedes cambiar el estado, plan y último día de acceso (UTC). No se borran negocios al suspenderlos. La cuenta de administrador no tiene una caja propia ni una pantalla para ver contraseñas.
+Ejecuta `python -m pytest -q` en un entorno con requirements.txt. Incluye regresión de sesiones, aislamiento, ventas, caja, inventario, clientes, descuentos, anulaciones, CSRF, configuración Railway y pruebas de precios, aprobación, reintentos, cancelación, cuotas, exportación y migración con copia previa.
 
-Este control de acceso NO cobra una suscripción: no hay pasarela de suscripciones, facturas de la plataforma, cobros recurrentes, devoluciones, correos ni renovación automática. Se añadirán por separado de los pagos que los clientes hagan al negocio.
+Pruebas de interfaz: `npm ci` y, con el entorno Python activado, `npm run test:ui`. El ejecutor inicia un servidor HTTP aislado con una base temporal, crea cuentas y ventas de prueba y lo detiene al terminar. Las pruebas DOM verifican comportamiento; no sustituyen una impresión física ni pruebas en Windows.
 
-## BAC HIT
+## Pendiente antes de 1.0
 
-La pantalla de personalización informa que la integración está pendiente. `/api/payments/bac-hit/status` indica `connected: false`. La ruta de cobro devuelve HTTP 501 y no envía tráfico a BAC. El método tarjeta de la caja es un simulador del servidor.
+El cobro bancario recurrente de suscripciones NO está integrado. BAC HIT permanece desconectado y `/api/payments/bac-hit/charge` devuelve 501; las tarjetas de caja son simulaciones. Consulta BAC-HIT.md.
 
-No se inventaron endpoints, enlaces de apertura de HIT, SDK, credenciales ni respuestas bancarias. Consulta `BAC-HIT.md` para la investigación y los requisitos de la conexión real.
-
-## Base de datos y copias
-
-Base predeterminada: `data/punto.sqlite3`. No eliminar esa carpeta al actualizar el código.
-
-Para crear una copia consistente, incluso si hay archivos WAL:
-
-```powershell
-.venv\Scripts\python.exe manage.py backup copias\punto-2026-09-17.sqlite3
-```
-
-El comando no sobrescribe archivos existentes. La copia incluye información privada de todos los negocios, hashes y sesiones: restringe su acceso. No está cifrada. La exportación JSON de un negocio es distinta de una copia completa del servidor.
-
-La restauración operativa y las pruebas programadas de recuperación están pendientes para la 0.4. Para una restauración manual de desarrollo: detener el servidor, preservar la carpeta data completa, restaurar la copia en una carpeta nueva y usar PUNTO_DB para apuntar a ella. No mezclar un archivo restaurado con WAL antiguos.
-
-## Configuración y despliegue posterior
-
-- `PUNTO_DB`: ruta del archivo SQLite.
-- `PUNTO_ORIGIN`: URL exacta, sin barra final, permitida para la interfaz. Predeterminado `http://127.0.0.1:8000`.
-- Para un servidor público: dominio HTTPS, proxy configurado, PUNTO_ORIGIN correcto, almacenamiento persistente, copias externas, alertas y revisión de seguridad. Esta entrega no configura hosting, DNS ni certificados.
-- Ejecutar un solo proceso para este piloto. La versión multiinstancia requiere PostgreSQL, migraciones y límites de acceso distribuidos.
-- La limitación de intentos usa la IP vista por el servidor. Detrás de un proxy debe configurarse y probarse la confianza en encabezados; no confiar en IPs declaradas libremente por el cliente.
-
-## Validación
-
-Quince pruebas del backend y la configuración Railway cubren aislamiento entre negocios, permisos, sesión y CSRF, idempotencia, stock, rechazo de pagos, suspensión/reactivación, expiración, imágenes y bloqueo de BAC real.
-
-```powershell
-.venv\Scripts\python.exe -m pytest -q
-```
-
-También se verificó la interfaz con happy-dom contra el servidor HTTP: registro, catálogo, efectivo, plantilla, sesión y tarjetas simuladas. Esto verifica la interacción y persistencia, no sustituye una prueba visual en navegador ni una impresión física.
-
-## Límites conocidos antes de venderlo
-
-Faltan recuperación/verificación de cuentas, MFA de administrador, empleados y permisos por rol, auditoría ampliada, facturación fiscal, cierre de caja, anulaciones/devoluciones, reconciliación de pagos reales, paginación de grandes historiales, cuotas de archivos, almacenamiento de imágenes separado, monitoreo y pruebas de carga. El estado del catálogo todavía se almacena como JSON por negocio; una base relacional normalizada es parte de la siguiente fase.
-
-El esquema inicial está marcado con `user_version=1`; no existe aún un motor completo de migraciones. El roadmap define las condiciones necesarias antes de llamar a esto versión 1.0.
-
-Prueba opcional de interfaz: con el servidor de prueba en ejecución, Node.js 24 y una base desechable, ejecutar `npm install` y `npm run test:ui`. La prueba crea un negocio y ventas de prueba; no ejecutarla contra la base de un comercio. Los tests del backend usan una base temporal independiente.
+Faltan instalador y actualizador firmado Windows, funcionamiento offline, facturación fiscal, devoluciones parciales y caja por usuario, empleados/sucursales, recuperación de cuenta, MFA, PostgreSQL, almacenamiento separado de imágenes, paginación de historiales grandes, monitoreo, copias externas programadas y restauración operativa probada. La API limita cada solicitud de catálogo a 8 MB; fotos grandes pueden alcanzar ese límite antes que el número de productos del plan. Esta actualización no se despliega automáticamente desde el ZIP.

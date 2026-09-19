@@ -1,14 +1,16 @@
+# Para actualizar un despliegue existente, consulta primero ACTUALIZAR.md.
+
 # Desplegar el piloto de Punto en Railway
 
 Hosting elegido por el propietario: Railway. Esta entrega prepara el despliegue; no crea servicios ni incurre en cargos en tu cuenta.
 
 ## Arquitectura de esta entrega
 
-Un servicio Python sirve la interfaz y la API desde el mismo dominio HTTPS. Un volumen persistente conserva SQLite. Una sola réplica y un solo proceso. PostgreSQL sigue pendiente para la 0.4: añadir un servicio PostgreSQL o DATABASE_URL ahora no hará que este código lo utilice.
+Un servicio Python sirve la interfaz y la API desde el mismo dominio HTTPS. Un volumen persistente conserva SQLite. Una sola réplica y un solo proceso. PostgreSQL sigue pendiente para una fase posterior: añadir un servicio PostgreSQL o DATABASE_URL ahora no hará que este código lo utilice.
 
 ## Pasos de despliegue
 
-1. Extrae el ZIP y coloca el **contenido de la carpeta Punto-0.3-servidor** en la raíz de un repositorio privado. Dockerfile, railway.json y server.py deben quedar en esa raíz. No subas bases de datos, copias, entornos virtuales ni contraseñas.
+1. Extrae el ZIP y coloca el **contenido de la carpeta Punto-0.5.1-servidor** en la raíz de un repositorio privado. Dockerfile, railway.json y server.py deben quedar en esa raíz. No subas bases de datos, copias, entornos virtuales ni contraseñas.
 2. En Railway crea un proyecto y un servicio conectado a ese repositorio. La configuración incluida selecciona Dockerfile y `python start.py`. Si conservas una carpeta contenedora en el repositorio, configura la raíz del servicio y la ruta del archivo de configuración de Railway para que apunten a ella.
 3. Adjunta un volumen al servicio, con ruta de montaje **/data**. Railway proporciona automáticamente RAILWAY_VOLUME_MOUNT_PATH; no simules esa variable manualmente.
 4. En el servicio, en Settings → Networking → Public Networking, genera el dominio HTTPS.
@@ -53,7 +55,7 @@ Railway termina HTTPS; PUNTO_ORIGIN hace que Punto emita cookies Secure. La API 
 
 No se confía automáticamente en encabezados X-Forwarded-For. El límite de intentos puede agrupar usuarios que lleguen desde una misma IP del proxy. Antes de abrir el registro masivo, verificar el contrato de proxy/IP de Railway y adaptar los límites por usuario e IP sin aceptar encabezados falsificables.
 
-El proyecto todavía no incluye recuperación de contraseña, MFA, copias automáticas configuradas, migración de datos del HTML ni PostgreSQL. Estos puntos siguen en la 0.4. HIT permanece desconectado.
+El proyecto todavía no incluye recuperación de contraseña, MFA, copias automáticas configuradas, migración de datos del HTML ni PostgreSQL. Estos puntos siguen pendientes. HIT permanece desconectado.
 
 ## Actualizaciones
 

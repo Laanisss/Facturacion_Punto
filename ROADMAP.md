@@ -1,38 +1,27 @@
-# Camino de Punto 0.3 a 1.0
+# Camino de Punto hacia 1.0
 
-Actualizado: 17 de septiembre de 2026. El orden prioriza datos fiables, control comercial y después cobros reales. Los hitos no son fechas prometidas: la integración HIT depende de BAC.
+## Entregado en 0.5.1 beta
 
-| Versión | Objetivo | Condición para darla por terminada |
+- Promociones de porcentaje, monto fijo, 2×1, 3×2 y combinaciones personalizadas, vigencia, compra mínima y selección de productos.
+
+## Conservado de 0.5 beta
+
+- Diseño del inicio, navegación y pantallas de trabajo renovado.
+- Clientes, descuentos con motivo, apertura/cierre de caja, entradas/salidas y anulaciones completas.
+- Inventario con ajustes e historial; búsqueda y filtros; exportación ampliada.
+- Suscripciones manuales Básico/Pro de 0.4, permisos, aislamiento por negocio y auditoría.
+- Migración v1/v2 → v3 con copia previa. SQLite con una sola réplica.
+
+Esta entrega adelanta funciones del antiguo hito de caja. No significa que PostgreSQL, recuperación de cuenta o integración bancaria del roadmap anterior estén terminados.
+
+| Etapa | Trabajo pendiente | Cómo se acepta |
 |---|---|---|
-| 0.3 | Prototipo visual y ventas de prueba | Fotos, logo, plantillas, recibos centrados, perfiles locales y tarjetas simuladas. Entregado anteriormente. |
-| 0.3.1 | Primera base de servidor | Cuentas, aislamiento por negocio, contraseñas con hash, sesiones, ventas transaccionales, administración de acceso y prueba de 14 días. Implementado en este paquete; sin hosting público. |
-| 0.4 | Piloto conectado y datos recuperables | Servidor HTTPS persistente, PostgreSQL/migraciones, copias y restauración probadas, migración desde el HTML con verificación de ventas, recuperación de cuenta y MFA del administrador. Probar dos negocios desde dos equipos sin cruce de datos. |
-| 0.5 | Aclarar y validar BAC HIT | Afiliación y documentación técnica oficial. Confirmar si HIT permite integración externa desde Windows. Si existe: sandbox, emparejamiento autorizado y cobro de prueba verificado por el servidor. Si no existe: elegir con el usuario registro manual o una solución BAC distinta; no anunciar conexión HIT. |
-| 0.6 | Caja para operación diaria | Apertura/cierre, arqueo, descuentos autorizados, impuestos configurables validados, anulaciones y devoluciones auditadas, cajeros/gerentes y reportes. Ningún movimiento debe desaparecer del historial. |
-| 0.7 | Suscripción comercial | Planes y funciones definidos, período de prueba, facturación de la plataforma, renovación/cancelación, cobros fallidos y período de gracia. Confirmar eventos con el proveedor y procesarlos una sola vez. No confundir cuotas de Punto con ventas del comercio. |
-| 0.8 | Aplicación Windows | Instalador firmado, actualización firmada con recuperación ante fallos y conservación de datos. Diseño de operación offline, cola de ventas y resolución de conflictos; probar cortes de internet sin duplicar ventas. |
-| 0.9 | Piloto con negocios reales | Pruebas con impresoras, devoluciones, cierres y cortes de red; monitoreo, soporte, restauración y revisión de seguridad. Validar los requisitos fiscales hondureños aplicables antes de emitir documentos fiscales. |
-| 1.0 | Lanzamiento comercial | Piloto aceptado, cobros e inventario conciliados, recuperación probada, requisitos fiscales resueltos, términos/privacidad y soporte preparados. Publicar exactamente qué integración bancaria está certificada y disponible. |
+| 0.6 · datos y acceso | Recuperación de cuenta, MFA del administrador, roles cajero/gerente, paginación, imágenes separadas, PostgreSQL y migraciones | Dos negocios y varios usuarios sin cruce de datos; copia externa y restauración real verificadas |
+| 0.7 · operación avanzada | Apertura por caja/usuario, devoluciones parciales, compras/proveedores, costos, márgenes e impuestos configurables | Ventas, existencias, efectivo, devoluciones y costos conciliados en escenarios reales |
+| 0.8 · Windows | Instalador firmado, actualización firmada, recuperación ante fallo, impresión y estrategia offline | Instalación y actualización en Windows, pruebas de desconexión y sincronización sin duplicar ventas |
+| Integración BAC | Confirmar posibilidad oficial de conexión HIT desde Windows, contrato, documentación y sandbox | No anunciar integración hasta verificar un pago real por el mecanismo autorizado; si no existe, acordar otra modalidad |
+| Suscripciones automáticas | Proveedor, eventos verificados, renovación, fallos, cancelación, facturas y conciliación | No duplicar cobros ni activar planes solo por una respuesta del navegador |
+| 0.9 · piloto supervisado | Monitoreo, soporte, carga, seguridad, impresoras, formación y requisitos fiscales aplicables | Negocios piloto completan operación y recuperación; diferencias resueltas |
+| 1.0 · lanzamiento | Cerrar los pendientes necesarios para el alcance comercial pactado | Instalación, cobros anunciados, facturación aplicable, datos, soporte y recuperación demostrados |
 
-## Decisiones de producto de esta entrega
-
-- La plataforma tiene un administrador global. Cada comercio tiene su propietario; cajeros y sucursales se incorporarán después.
-- El administrador gestiona acceso y planes, pero no puede leer contraseñas.
-- Los datos del negocio deben poder exportarse aun con acceso suspendido. Suspender no equivale a borrar.
-- La prueba dura 14 días como valor inicial; debe revisarse antes del lanzamiento.
-- Los planes Basic/Pro no tienen todavía precios ni límites diferenciados. No se genera deuda ni un cargo al elegirlos.
-- Los ingresos del comercio deberían liquidarse mediante su propia afiliación bancaria. Punto cobrará su suscripción por un flujo separado. Es una propuesta de arquitectura comercial, pendiente de contratación con los proveedores.
-- Las credenciales del banco, cuando existan, se manejarán fuera del HTML y del instalador. No se pedirán PIN, CVV ni números completos de tarjeta en Punto.
-
-## Criterios específicos de cobros antes de 1.0
-
-1. El servidor calcula monto y moneda desde el pedido, y vincula usuario, negocio y terminal.
-2. Una referencia única identifica cada intento; los reintentos no duplican el cargo.
-3. No se marca una venta como cobrada por un botón del cliente, una captura o un enlace de retorno sin verificar.
-4. Se verifica la respuesta mediante el mecanismo oficial de BAC (consulta firmada/evento/SDK, según lo que habiliten).
-5. Se resuelven pagos pendientes, rechazos, pérdidas de conexión, reembolsos y conciliación con el estado bancario.
-6. Se registran cambios de suscripción y acciones sensibles del administrador, con actor y motivo.
-
-## Próxima entrega concreta: 0.4
-
-Hosting elegido: Railway. Configurar el proyecto y el dominio; preparar el despliegue, persistencia, backups y recuperación. Reunir en paralelo la documentación oficial de integración HIT. El código local y las pruebas pueden avanzar sin credenciales bancarias, pero no se activarán cobros reales sin esa información.
+Los hitos son condiciones de aceptación, no fechas prometidas. Los tickets actuales no tienen validez fiscal y las tarjetas de caja siguen siendo simuladas.
